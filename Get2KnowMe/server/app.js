@@ -15,6 +15,7 @@ import compression from "compression";
 import morgan from "morgan";
 import winston from "winston";
 import { wafMiddleware } from "./src/middleware/wafMiddleware.js";
+import { ipBlacklistMiddleware } from "./ip-blacklist-middleware.js";
 import cookieParser from "cookie-parser";
 import csrf from "csurf";
 
@@ -136,6 +137,8 @@ const authLimiter = rateLimit({
 app.use(limiter);
 // WAF (Web Application Firewall) middleware - blocks requests to PHP files, scanners, and other malicious patterns
 app.use(wafMiddleware);
+// IP Blacklist middleware - blocks requests from known malicious IPs (ip-blacklist.json)
+app.use(ipBlacklistMiddleware(logger));
 
 app.use("/api/users/login", authLimiter); // Protect login endpoint from brute force
 app.use("/api/users/signup", authLimiter); // Protect signup endpoint from abuse

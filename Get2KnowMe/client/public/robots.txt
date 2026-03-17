@@ -1,0 +1,32 @@
+# Robots.txt for Get2KnowMe
+# https://get2know.me
+
+# Block all bots from API and private paths
+User-agent: *
+Disallow: /api/
+Disallow: /admin/
+
+# Block aggressive SEO/marketing crawlers that serve no purpose here
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: HubSpot Crawler
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /
+
+# Sitemap
+Sitemap: https://get2know.me/sitemap.xml

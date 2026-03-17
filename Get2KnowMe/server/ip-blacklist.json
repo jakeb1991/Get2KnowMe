@@ -29,6 +29,24 @@
       "reason": "Automated scraper - 5 simultaneous requests downloading 2MB data using okhttp/5.3.0",
       "dateAdded": "2026-03-11",
       "severity": "medium"
+    },
+    {
+      "ip": "172.190.142.176",
+      "reason": "Mass automated scanner - 30+ requests in 2 seconds with no user agent",
+      "dateAdded": "2026-03-16",
+      "severity": "high"
+    },
+    {
+      "ip": "45.153.34.43",
+      "reason": "Bot with rotating spoofed user agents (Chrome/91) - 16+ rapid sequential requests",
+      "dateAdded": "2026-03-16",
+      "severity": "high"
+    },
+    {
+      "ip": "103.77.106.81",
+      "reason": "Rapid requests with spoofed old Firefox/77 user agent from suspicious Asian IP",
+      "dateAdded": "2026-03-16",
+      "severity": "medium"
     }
   ],
   "rateLimits": {
