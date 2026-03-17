@@ -51,6 +51,9 @@ const logger = winston.createLogger({
 // Trust proxy to handle forwarded headers correctly in production, this helps with correct IP logging and security headers.
 app.set("trust proxy", 1);
 
+// File-based IP blacklist middleware (server/ip-blacklist.json)
+app.use(ipBlacklistMiddleware(logger));
+
 // WAF IP Blacklist Middleware - blocks requests from known malicious IPs
 // Configure blacklisted IPs via WAF_BLACKLIST environment variable (comma-separated)
 const blacklistedIPs = process.env.WAF_BLACKLIST 
