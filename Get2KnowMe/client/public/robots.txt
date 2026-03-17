@@ -28,5 +28,38 @@ Disallow: /
 User-agent: MegaIndex
 Disallow: /
 
+# Block AI training crawlers (not for indexing/search, only data harvesting)
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+# AI search/discovery bots are allowed (PerplexityBot, YouBot fall through to defaults above)
+
 # Sitemap
 Sitemap: https://get2know.me/sitemap.xml
