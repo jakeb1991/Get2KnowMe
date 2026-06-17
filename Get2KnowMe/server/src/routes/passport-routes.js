@@ -56,8 +56,17 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
     }
     passportData.trustedContact.phone = normalizedPhone;
 
-    // Use dot-notation for all passport fields so the field-encryption plugin
-    // can encrypt each field individually (subdocument replacement breaks encryption).
+    // Use findById + save() so the field-encryption plugin's pre('save') and
+    // post('init') hooks fire correctly on the embedded subdocument.
+    // findByIdAndUpdate bypasses these hooks and causes fields to be saved
+    // without encryption, then fail to decrypt on read.
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!user.communicationPassport) {
+      user.communicationPassport = {};
+    }
+
     const passportFields = [
       'firstName', 'lastName', 'preferredName', 'preferredPronouns', 'customPronouns',
       'diagnoses', 'customDiagnosis', 'healthAlert', 'customHealthAlert', 'allergyList',
@@ -66,29 +75,21 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
       'medications', 'calmingStrategies', 'distressSigns', 'sensoryNeeds'
     ];
 
-    const dotUpdate = {};
     for (const field of passportFields) {
       if (field in passportData) {
-        dotUpdate[`communicationPassport.${field}`] = passportData[field];
+        user.communicationPassport[field] = passportData[field];
       }
     }
-    dotUpdate['communicationPassport.profilePasscode'] = cleanPasscode;
-    dotUpdate['communicationPassport.updatedAt'] = new Date();
+    user.communicationPassport.profilePasscode = cleanPasscode;
+    user.communicationPassport.updatedAt = new Date();
 
-    // profilePhoto lives at the top-level userSchema (not encrypted subdocument)
+    // profilePhoto lives at the top-level userSchema (not the encrypted subdocument)
     if (typeof passportData.profilePhoto !== 'undefined') {
-      dotUpdate['profilePhoto'] = passportData.profilePhoto;
+      user.profilePhoto = passportData.profilePhoto;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: dotUpdate },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    await user.save();
+    const updatedUser = user;
 
     // Notify all followers of passport update
     try {
