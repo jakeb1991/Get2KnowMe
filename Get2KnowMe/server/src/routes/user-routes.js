@@ -261,6 +261,35 @@ router.post('/signup', signupValidation, async (req, res) => {
     }
 });
 
+// POST Resend confirmation email
+router.post('/resend-confirmation', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const pending = await PendingConfirmation.findOne({ email: normalizedEmail });
+
+    // Always return success to avoid email enumeration
+    if (!pending) return res.json({ message: 'If that email is registered and pending, a new confirmation link has been sent.' });
+
+    // Refresh the token and expiry
+    const confirmToken = crypto.randomBytes(32).toString('hex');
+    pending.confirmToken = confirmToken;
+    pending.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await pending.save();
+
+    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://get2know.me' : 'http://localhost:3001';
+    const confirmUrl = `${baseUrl}/api/users/confirm-email?token=${confirmToken}`;
+    await sendConfirmationEmail(normalizedEmail, confirmUrl, pending.username);
+
+    res.json({ message: 'If that email is registered and pending, a new confirmation link has been sent.' });
+  } catch (error) {
+    console.error('Resend confirmation error:', error);
+    res.status(500).json({ message: 'Failed to resend confirmation email' });
+  }
+});
+
 // PUT Update username route
 router.put('/update-username', authenticateToken, updateUsernameValidation, async (req, res) => {
   try {

@@ -1,14 +1,35 @@
-import React, { useState } from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AuthService from "../utils/auth.js";
 import QRCodeGenerator from "../components/QRCodeGenerator.jsx";
 import { usePassportData } from "../hooks/usePassportData.js";
 import '../styles/Home.css';
 
+const ONBOARDING_KEY = 'onboarding_seen';
+
 const Profile = () => {
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const dismissOnboarding = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+  };
+
+  const startPassport = () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setShowOnboarding(false);
+    navigate('/create-passport');
+  };
 
   // Get user info if logged in
   let user = null;
@@ -46,6 +67,24 @@ const Profile = () => {
 
   return (
     <Container className="home-container">
+      {/* Onboarding welcome modal */}
+      <Modal show={showOnboarding} onHide={dismissOnboarding} centered size="md">
+        <Modal.Header closeButton>
+          <Modal.Title>Welcome to Get2KnowMe! 👋</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="p-4">
+          <p className="mb-3">
+            Your account is ready. Now let's build your <strong>Communication Passport</strong> — a personal profile that helps others understand how to communicate with you.
+          </p>
+          <p className="mb-3">It takes about <strong>5 minutes</strong> and we'll guide you through it step by step. You can save a draft and come back any time.</p>
+          <p className="text-muted small mb-0">Once it's done, you'll get a QR code to share with anyone — teachers, doctors, employers, or anyone you meet.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={dismissOnboarding}>I'll do it later</Button>
+          <Button variant="primary" onClick={startPassport}>Let's build my passport →</Button>
+        </Modal.Footer>
+      </Modal>
+
       <Row className="justify-content-center">
         <Col md={10} lg={8}>
           {/* Main Profile Card */}
