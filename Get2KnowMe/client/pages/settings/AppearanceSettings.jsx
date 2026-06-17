@@ -349,7 +349,7 @@ const AppearanceSettings = () => {
                     width: '16px',
                     height: '16px',
                     borderRadius: '50%',
-                    backgroundColor: colorblindMode ? colorblindTypes[colorblindType].colors.primary : (colorSchemes[theme]?.[colorScheme]?.primary || '#ff6b35'),
+                    backgroundColor: colorblindMode ? colorblindTypes[colorblindType].colors[theme].primary : (colorSchemes[theme]?.[colorScheme]?.primary || '#4c93a1'),
                     border: '1px solid #dee2e6'
                   }}
                 ></span>

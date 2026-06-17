@@ -288,8 +288,8 @@ body:not([data-bs-theme="dark"]) .view-passport-container {
 
 /* Dropdown styling */
 .dropdown-item:hover {
-  background: var(--gradient-bg) !important;
-  color: white !important;
+  background-color: color-mix(in srgb, var(--primary-color) 12%, transparent) !important;
+  color: var(--primary-color) !important;
 }
 
 /* Form controls */
@@ -777,54 +777,53 @@ body:not([data-bs-theme="dark"]) .view-passport-container {
 }
 
 /* Fallback for browsers that don't support color-mix */
-/* Fallback for browsers that don't support color-mix */
 @supports not (color: color-mix(in srgb, red, blue)) {
   .nav-item-custom:hover {
-    background-color: rgba(255, 107, 53, 0.1) !important;
+    background-color: rgba(76, 147, 161, 0.1) !important;
   }
-  
+
   .nav-item-custom.active {
-    background-color: rgba(255, 107, 53, 0.15) !important;
+    background-color: rgba(76, 147, 161, 0.15) !important;
   }
-  
+
   .form-check-input:focus,
   .form-control:focus,
   .settings-form-control:focus {
-    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(76, 147, 161, 0.25);
   }
-  
+
   .alert-primary {
-    background-color: rgba(255, 107, 53, 0.1);
+    background-color: rgba(76, 147, 161, 0.1);
   }
-  
+
   .color-scheme-card.border-primary,
   .theme-card.border-primary {
-    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(76, 147, 161, 0.25);
   }
-  
+
   .bg-primary-soft {
-    background-color: rgba(255, 107, 53, 0.1) !important;
+    background-color: rgba(76, 147, 161, 0.1) !important;
   }
-  
+
   .bg-secondary-soft {
-    background-color: rgba(255, 140, 90, 0.1) !important;
+    background-color: rgba(141, 208, 197, 0.1) !important;
   }
-  
+
   .bg-accent-soft {
-    background-color: rgba(74, 144, 226, 0.1) !important;
+    background-color: rgba(243, 178, 86, 0.1) !important;
   }
-  
+
   .settings-btn-primary:hover,
   .passport-submit-btn:hover:not(:disabled),
   .register-btn:hover:not(:disabled),
   .lookup-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    box-shadow: 0 8px 25px rgba(76, 147, 161, 0.3);
   }
-  
+
   .nav-item.dropdown .btn.nav-item-custom:hover,
   .nav-item.dropdown .btn.nav-item-custom:focus,
   .nav-item.dropdown .btn.nav-item-custom:active {
-    background-color: rgba(255, 107, 53, 0.1) !important;
+    background-color: rgba(76, 147, 161, 0.1) !important;
   }
 }
 
@@ -1248,6 +1247,7 @@ a.text-primary:hover {
   background-color: var(--card-bg) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
   margin-bottom: 1.5rem !important;
+  overflow: hidden !important;
 }
 
 [data-bs-theme="light"] .settings-section,
@@ -1257,6 +1257,7 @@ a.text-primary:hover {
   background-color: #ffffff !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
   margin-bottom: 1.5rem !important;
+  overflow: hidden !important;
 }
 
 /* Card headers with enhanced styling */

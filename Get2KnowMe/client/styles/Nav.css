@@ -372,13 +372,13 @@
 }
 
 .dropdown-item:hover {
-  background: var(--gradient-bg);
-  color: white;
-  transform: translateX(5px);
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+  transform: translateX(3px);
 }
 
 .dropdown-item:hover .text-danger {
-  color: #ff6b6b !important;
+  color: #dc3545 !important;
 }
 
 .dropdown-divider {
