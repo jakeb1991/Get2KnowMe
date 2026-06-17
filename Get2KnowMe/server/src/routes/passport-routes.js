@@ -56,36 +56,35 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
     }
     passportData.trustedContact.phone = normalizedPhone;
 
-    // Extract profilePhoto separately — saves via dot-notation to avoid
-    // subdocument-replacement interference with the field-encryption plugin's
-    // pre('findOneAndUpdate') hook on communicationPassportSchema.
-    const { profilePhoto, ...passportWithoutPhoto } = passportData;
+    // Use dot-notation for all passport fields so the field-encryption plugin
+    // can encrypt each field individually (subdocument replacement breaks encryption).
+    const passportFields = [
+      'firstName', 'lastName', 'preferredName', 'preferredPronouns', 'customPronouns',
+      'diagnoses', 'customDiagnosis', 'healthAlert', 'customHealthAlert', 'allergyList',
+      'communicationPreferences', 'customPreferences', 'triggers', 'likes', 'dislikes',
+      'trustedContact', 'otherInformation', 'communicationMethod', 'avoidWords',
+      'medications', 'calmingStrategies', 'distressSigns', 'sensoryNeeds'
+    ];
 
-    // Update passport (without profilePhoto)
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      {
-        $set: {
-          communicationPassport: {
-            ...passportWithoutPhoto,
-            profilePasscode: cleanPasscode,
-            updatedAt: new Date()
-          }
-        }
-      },
-      { new: true, runValidators: true }
-    );
-
-    // Save photo separately using dot-notation (bypasses subdocument replacement)
-    if (typeof profilePhoto !== 'undefined') {
-      await User.updateOne(
-        { _id: userId },
-        { $set: { 'communicationPassport.profilePhoto': profilePhoto } }
-      );
-      if (updatedUser?.communicationPassport) {
-        updatedUser.communicationPassport.profilePhoto = profilePhoto;
+    const dotUpdate = {};
+    for (const field of passportFields) {
+      if (field in passportData) {
+        dotUpdate[`communicationPassport.${field}`] = passportData[field];
       }
     }
+    dotUpdate['communicationPassport.profilePasscode'] = cleanPasscode;
+    dotUpdate['communicationPassport.updatedAt'] = new Date();
+
+    // profilePhoto lives at the top-level userSchema (not encrypted subdocument)
+    if (typeof passportData.profilePhoto !== 'undefined') {
+      dotUpdate['profilePhoto'] = passportData.profilePhoto;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: dotUpdate },
+      { new: true, runValidators: true }
+    );
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
@@ -142,12 +141,15 @@ router.get('/my-passport', authenticateToken, async (req, res) => {
     
     if (!foundUser) return res.status(404).json({ message: 'User not found' });
     
-    if (!foundUser.communicationPassport || 
+    if (!foundUser.communicationPassport ||
         Object.keys(foundUser.communicationPassport).length === 0) {
       return res.status(404).json({ message: 'Communication passport not found' });
     }
-    
-    return res.json({ passport: foundUser.communicationPassport });
+
+    return res.json({
+      passport: foundUser.communicationPassport,
+      profilePhoto: foundUser.profilePhoto || null
+    });
   } catch (error) {
     console.error('Error fetching communication passport:', error);
     return res.status(500).json({ message: 'Error fetching communication passport' });
@@ -215,7 +217,7 @@ router.get('/public/:passcode', async (req, res) => {
       calmingStrategies: user.communicationPassport.calmingStrategies,
       distressSigns: user.communicationPassport.distressSigns,
       sensoryNeeds: user.communicationPassport.sensoryNeeds,
-      profilePhoto: user.communicationPassport.profilePhoto,
+      profilePhoto: user.profilePhoto || null,
       passportViewCount: (user.communicationPassport.passportViewCount || 0) + 1,
       updatedAt: user.communicationPassport.updatedAt
     };

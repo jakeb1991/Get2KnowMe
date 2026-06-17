@@ -1,14 +1,12 @@
 
 import React, { useEffect, useState } from "react";
-import { Container, Spinner, Card, Button, Alert } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Container, Spinner, Card } from "react-bootstrap";
 import AuthService from "../utils/auth.js";
 import CommunicationPassport from "../components/CommunicationPassport.jsx";
-import '../styles/Home.css';
 
 const MyPassport = () => {
   const [passport, setPassport] = useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showQRModal, setShowQRModal] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +23,7 @@ const MyPassport = () => {
         if (!res.ok) throw new Error("Failed to fetch passport");
         const data = await res.json();
         setPassport(data.passport);
+        setProfilePhoto(data.profilePhoto || null);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -65,28 +64,19 @@ const MyPassport = () => {
   }
 
   return (
-    <Container className="home-container py-4">
-      <div className="d-flex justify-content-end mb-3 gap-2">
-        {!passport.profilePhoto && (
-          <Alert variant="info" className="mb-0 py-2 px-3 d-flex align-items-center gap-2" style={{ fontSize: '0.875rem' }}>
-            <FontAwesomeIcon icon="camera" />
-            <span>Add a photo to your passport — <Link to="/create-passport">Edit Passport</Link></span>
-          </Alert>
-        )}
-        <Link to="/create-passport" className="btn btn-outline-primary btn-sm" style={{ borderRadius: '20px', whiteSpace: 'nowrap' }}>
-          <FontAwesomeIcon icon="edit" className="me-1" />
-          Edit Passport
-        </Link>
-      </div>
-      <CommunicationPassport
-        passport={passport}
-        showQRModal={showQRModal}
-        setShowQRModal={setShowQRModal}
-        isOwner={true}
-        passcode={passport.profilePasscode}
-        viewCount={passport.passportViewCount}
-      />
-    </Container>
+    <div style={{ background: 'var(--bg-color)', minHeight: '100vh', padding: '2rem 0' }}>
+      <Container className="py-4">
+        <CommunicationPassport
+          passport={passport}
+          profilePhoto={profilePhoto}
+          showQRModal={showQRModal}
+          setShowQRModal={setShowQRModal}
+          isOwner={true}
+          passcode={passport.profilePasscode}
+          viewCount={passport.passportViewCount}
+        />
+      </Container>
+    </div>
   );
 };
 

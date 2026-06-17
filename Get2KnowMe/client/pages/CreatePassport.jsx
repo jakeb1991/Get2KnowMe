@@ -73,7 +73,7 @@ const CreatePassport = () => {
   const alertRef = useRef(null);
 
   const resizeImage = (file) =>
-    new Promise((resolve) => {
+    new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
@@ -85,6 +85,10 @@ const CreatePassport = () => {
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
         resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error('Image could not be loaded. Try a JPG or PNG file.'));
       };
       img.src = url;
     });
@@ -161,7 +165,7 @@ const CreatePassport = () => {
         const data = await response.json();
         const passportData = {
           ...data.passport,
-          profilePhoto: data.passport.profilePhoto || "",
+          profilePhoto: data.profilePhoto || "",
           communicationMethod: data.passport.communicationMethod || "",
           avoidWords: data.passport.avoidWords || "",
           medications: data.passport.medications || "",

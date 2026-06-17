@@ -94,7 +94,6 @@ const communicationPassportSchema = new Schema({
   calmingStrategies: { type: String, trim: true },
   distressSigns: { type: String, trim: true },
   sensoryNeeds: { type: String, trim: true },
-  profilePhoto: { type: String },
   passportViewCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
@@ -195,6 +194,7 @@ const userSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User' },
     blockedAt: { type: Date, default: Date.now }
   }],
+  profilePhoto: { type: String },
   delegates: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
     permissions: { type: String, enum: ['view', 'edit'], default: 'view' },

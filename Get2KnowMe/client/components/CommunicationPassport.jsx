@@ -7,6 +7,7 @@ import {
   Alert,
   Button
 } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import QRCodeGenerator from "./QRCodeGenerator.jsx";
 import get2knowmeLogo from "/get2knowme_logo_png.png";
@@ -15,6 +16,7 @@ import "../styles/ViewPassport.css";
 
 const CommunicationPassport = ({
   passport,
+  profilePhoto,
   showQRModal,
   setShowQRModal,
   isOwner = false,
@@ -84,16 +86,18 @@ const CommunicationPassport = ({
         <Card className="passport-display-card">
           <Card.Header className="passport-header text-center">
             <div className="passport-icon mb-2">
-              {passport.profilePhoto ? (
+              <img src={get2knowmeLogo} alt="Get2KnowMe Logo" className="get2knowme-logo" />
+            </div>
+            {profilePhoto && (
+              <div className="mb-3">
                 <img
-                  src={passport.profilePhoto}
+                  src={profilePhoto}
                   alt="Profile"
                   className="passport-profile-photo"
+                  style={{ width: 90, height: 90, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--primary-color, #4a90d9)' }}
                 />
-              ) : (
-                <img src={get2knowmeLogo} alt="Get2KnowMe Logo" className="get2knowme-logo" />
-              )}
-            </div>
+              </div>
+            )}
             <h2 className="passport-name">
               {passport.preferredName || passport.firstName} {passport.lastName}
               {passport.preferredPronouns === "Other" && passport.customPronouns && passport.customPronouns.trim() !== "" ? (
@@ -447,18 +451,24 @@ const CommunicationPassport = ({
                     </small>
                   )}
                 </div>
-                <div className="d-flex gap-2 no-print">
+                <div className="d-flex gap-2 no-print flex-wrap">
                   {isOwner && (
-                    <Button
-                      variant="outline-info"
-                      size="sm"
-                      onClick={() => setShowQRModal(true)}
-                      title="Generate QR code for easy sharing"
-                      className="btn-secondary"
-                    >
-                      <FontAwesomeIcon icon="qrcode" className="me-1" />
-                      QR Code
-                    </Button>
+                    <>
+                      <Link to="/create-passport" className="btn btn-outline-primary btn-sm btn-secondary-reverse">
+                        <FontAwesomeIcon icon="edit" className="me-1" />
+                        Edit Passport
+                      </Link>
+                      <Button
+                        variant="outline-info"
+                        size="sm"
+                        onClick={() => setShowQRModal(true)}
+                        title="Generate QR code for easy sharing"
+                        className="btn-secondary"
+                      >
+                        <FontAwesomeIcon icon="qrcode" className="me-1" />
+                        QR Code
+                      </Button>
+                    </>
                   )}
                   <Button
                     variant="outline-primary"

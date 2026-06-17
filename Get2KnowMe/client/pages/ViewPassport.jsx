@@ -220,6 +220,7 @@ const ViewPassport = () => {
     <Container className="view-passport-container py-4">
       <CommunicationPassport
         passport={passport}
+        profilePhoto={passport.profilePhoto || null}
         showQRModal={showQRModal}
         setShowQRModal={setShowQRModal}
         showTrustedContact={showTrustedContact}
