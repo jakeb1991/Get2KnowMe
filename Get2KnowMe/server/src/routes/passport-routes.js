@@ -193,6 +193,12 @@ router.get('/public/:passcode', async (req, res) => {
       customPreferences: user.communicationPassport.customPreferences,
       trustedContact: user.communicationPassport.trustedContact,
       otherInformation: user.communicationPassport.otherInformation,
+      communicationMethod: user.communicationPassport.communicationMethod,
+      avoidWords: user.communicationPassport.avoidWords,
+      medications: user.communicationPassport.medications,
+      calmingStrategies: user.communicationPassport.calmingStrategies,
+      distressSigns: user.communicationPassport.distressSigns,
+      sensoryNeeds: user.communicationPassport.sensoryNeeds,
       profilePhoto: user.communicationPassport.profilePhoto,
       passportViewCount: (user.communicationPassport.passportViewCount || 0) + 1,
       updatedAt: user.communicationPassport.updatedAt

@@ -145,6 +145,22 @@ const CommunicationPassport = ({
               </div>
             )}
 
+            {/* Medications Section */}
+            {passport.medications && passport.medications.trim() !== "" && (
+              <div className="passport-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon icon="pills" className="section-icon text-danger" />
+                  <h4 className="section-title">Medications</h4>
+                </div>
+                <div className="section-content">
+                  <div className="triggers-box">
+                    <FontAwesomeIcon icon="capsules" className="me-2 text-danger" />
+                    {passport.medications}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Diagnosis Section */}
             <div className="passport-section mb-4">
               <div className="section-header">
@@ -161,6 +177,19 @@ const CommunicationPassport = ({
                 </div>
               </div>
             </div>
+
+            {/* How I Communicate Section */}
+            {passport.communicationMethod && passport.communicationMethod.trim() !== "" && (
+              <div className="passport-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon icon="comments" className="section-icon text-primary" />
+                  <h4 className="section-title">How I Communicate</h4>
+                </div>
+                <div className="section-content">
+                  <div className="other-info-box">{passport.communicationMethod}</div>
+                </div>
+              </div>
+            )}
 
             {/* Communication Preferences Section */}
             {passport.communicationPreferences &&
@@ -214,6 +243,48 @@ const CommunicationPassport = ({
                   <div className="custom-preferences-box">
                     {passport.customPreferences}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Signs of Distress Section */}
+            {passport.distressSigns && passport.distressSigns.trim() !== "" && (
+              <div className="passport-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon icon="exclamation-circle" className="section-icon text-warning" />
+                  <h4 className="section-title">Signs I Am Struggling</h4>
+                </div>
+                <div className="section-content">
+                  <div className="other-info-box">{passport.distressSigns}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Calming Strategies Section */}
+            {passport.calmingStrategies && passport.calmingStrategies.trim() !== "" && (
+              <div className="passport-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon icon="heart" className="section-icon text-success" />
+                  <h4 className="section-title">What Helps Me Calm Down</h4>
+                </div>
+                <div className="section-content">
+                  <div className="likes-box">
+                    <FontAwesomeIcon icon="check-circle" className="me-2 text-success" />
+                    {passport.calmingStrategies}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Sensory Needs Section */}
+            {passport.sensoryNeeds && passport.sensoryNeeds.trim() !== "" && (
+              <div className="passport-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon icon="volume-up" className="section-icon" />
+                  <h4 className="section-title">Sensory Needs</h4>
+                </div>
+                <div className="section-content">
+                  <div className="other-info-box">{passport.sensoryNeeds}</div>
                 </div>
               </div>
             )}

@@ -10,6 +10,10 @@ const diagnosisOptions = [
   "Tourette's Syndrome",
   "C-PTSD (Complex PTSD)",
   "Anxiety",
+  "Pathological Demand Avoidance (PDA)",
+  "Cerebral Palsy",
+  "Down Syndrome",
+  "Acquired Brain Injury",
   "No Diagnosis",
   "Other",
 ];
@@ -130,6 +134,12 @@ export function validatePassportData(req, res, next) {
   data.trustedContact.countryCode = sanitizeString(data.trustedContact.countryCode);
   data.trustedContact.email = sanitizeString(data.trustedContact.email);
   data.otherInformation = sanitizeString(data.otherInformation);
+  data.communicationMethod = sanitizeString(data.communicationMethod);
+  data.avoidWords = sanitizeString(data.avoidWords);
+  data.medications = sanitizeString(data.medications);
+  data.calmingStrategies = sanitizeString(data.calmingStrategies);
+  data.distressSigns = sanitizeString(data.distressSigns);
+  data.sensoryNeeds = sanitizeString(data.sensoryNeeds);
 
   next();
 }

@@ -31,6 +31,10 @@ const communicationPassportSchema = new Schema({
       'Tourette\'s Syndrome',
       'C-PTSD (Complex PTSD)',
       'Anxiety',
+      'Pathological Demand Avoidance (PDA)',
+      'Cerebral Palsy',
+      'Down Syndrome',
+      'Acquired Brain Injury',
       'No Diagnosis',
       'Other'
     ]
@@ -84,6 +88,12 @@ const communicationPassportSchema = new Schema({
   },
   profilePasscode: { type: String, trim: true, minlength: 6, maxlength: 20 },
   otherInformation: { type: String, trim: true, maxlength: 1000 },
+  communicationMethod: { type: String, trim: true },
+  avoidWords: { type: String, trim: true },
+  medications: { type: String, trim: true },
+  calmingStrategies: { type: String, trim: true },
+  distressSigns: { type: String, trim: true },
+  sensoryNeeds: { type: String, trim: true },
   profilePhoto: { type: String },
   passportViewCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
@@ -111,7 +121,13 @@ communicationPassportSchema.plugin(fieldEncryption, {
     'dislikes',
     'trustedContact',
     'profilePasscode',
-    'otherInformation'
+    'otherInformation',
+    'communicationMethod',
+    'avoidWords',
+    'medications',
+    'calmingStrategies',
+    'distressSigns',
+    'sensoryNeeds'
   ],
   secret: process.env.FIELD_ENCRYPTION_SECRET,
   saltGenerator: secret => secret.slice(0, 16)

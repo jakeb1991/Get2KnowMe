@@ -56,6 +56,12 @@ const CreatePassport = () => {
     profilePasscode: "",
     otherInformation: "",
     profilePhoto: "",
+    communicationMethod: "",
+    avoidWords: "",
+    medications: "",
+    calmingStrategies: "",
+    distressSigns: "",
+    sensoryNeeds: "",
   });
 
   const [error, setError] = useState("");
@@ -107,6 +113,10 @@ const CreatePassport = () => {
     "Tourette's Syndrome",
     "C-PTSD (Complex PTSD)",
     "Anxiety",
+    "Pathological Demand Avoidance (PDA)",
+    "Cerebral Palsy",
+    "Down Syndrome",
+    "Acquired Brain Injury",
     "No Diagnosis",
     "Other",
   ];
@@ -152,6 +162,12 @@ const CreatePassport = () => {
         const passportData = {
           ...data.passport,
           profilePhoto: data.passport.profilePhoto || "",
+          communicationMethod: data.passport.communicationMethod || "",
+          avoidWords: data.passport.avoidWords || "",
+          medications: data.passport.medications || "",
+          calmingStrategies: data.passport.calmingStrategies || "",
+          distressSigns: data.passport.distressSigns || "",
+          sensoryNeeds: data.passport.sensoryNeeds || "",
           trustedContact: {
             ...data.passport.trustedContact,
             countryCode: data.passport.trustedContact?.countryCode || "GB",
@@ -576,6 +592,36 @@ const CreatePassport = () => {
 
                     <div className="form-section mb-3">
                       <Form.Group>
+                        <Form.Label>How I Communicate <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="communicationMethod"
+                          value={formData.communicationMethod}
+                          onChange={handleInputChange}
+                          placeholder="e.g. I speak verbally but need extra time. I use an AAC device. I communicate using sign language (BSL). I prefer written communication..."
+                        />
+                        <Form.Text className="text-muted">Describe your primary way of communicating — this is the first thing others should know.</Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>Words / Phrases / Topics to Avoid <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="avoidWords"
+                          value={formData.avoidWords}
+                          onChange={handleInputChange}
+                          placeholder="Words, phrases, or topics that upset or confuse you..."
+                        />
+                        <Form.Text className="text-muted">Helps others communicate in a way that feels safe and clear for you.</Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
                         <Form.Label>Triggers <span className="text-muted small">(optional)</span></Form.Label>
                         <Form.Control
                           as="textarea"
@@ -586,6 +632,51 @@ const CreatePassport = () => {
                           placeholder="Situations or things that may cause distress or discomfort..."
                         />
                         <Form.Text className="text-muted">Helps others avoid situations that may be difficult for you.</Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>Signs I Am Struggling <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="distressSigns"
+                          value={formData.distressSigns}
+                          onChange={handleInputChange}
+                          placeholder="How others can tell when you are anxious, overwhelmed, or in distress..."
+                        />
+                        <Form.Text className="text-muted">Helps others recognise when you need support, even if you can't say so.</Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>What Helps Me Calm Down <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="calmingStrategies"
+                          value={formData.calmingStrategies}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Give me quiet space, use a calm voice, let me use my fidget, avoid physical contact..."
+                        />
+                        <Form.Text className="text-muted">What others can do — or stop doing — when you are overwhelmed.</Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>Sensory Needs <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          name="sensoryNeeds"
+                          value={formData.sensoryNeeds}
+                          onChange={handleInputChange}
+                          placeholder="e.g. Sensitive to loud noises. Bright lights are overwhelming. I dislike strong smells. I need movement breaks..."
+                        />
+                        <Form.Text className="text-muted">Sensitivities to noise, light, touch, smell, crowds, or the environment.</Form.Text>
                       </Form.Group>
                     </div>
 
@@ -731,6 +822,19 @@ const CreatePassport = () => {
                           />
                         </Form.Group>
                       )}
+                    </div>
+
+                    <div className="form-section mb-4">
+                      <h5 className="mb-1">Medications <span className="text-muted small fw-normal">(optional)</span></h5>
+                      <p className="small text-muted mb-3">Note any current medications or important medical information for carers and emergency responders.</p>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        name="medications"
+                        value={formData.medications || ""}
+                        onChange={handleInputChange}
+                        placeholder="e.g. Takes Ritalin 10mg twice daily. Carries an EpiPen for bee stings..."
+                      />
                     </div>
 
                     <div className="form-section mb-4">
