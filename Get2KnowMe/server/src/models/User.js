@@ -84,6 +84,8 @@ const communicationPassportSchema = new Schema({
   },
   profilePasscode: { type: String, trim: true, minlength: 6, maxlength: 20 },
   otherInformation: { type: String, trim: true, maxlength: 1000 },
+  profilePhoto: { type: String },
+  passportViewCount: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
@@ -176,6 +178,22 @@ const userSchema = new Schema({
   blockedUsers: [{
     user: { type: Schema.Types.ObjectId, ref: 'User' },
     blockedAt: { type: Date, default: Date.now }
+  }],
+  delegates: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    permissions: { type: String, enum: ['view', 'edit'], default: 'view' },
+    addedAt: { type: Date, default: Date.now }
+  }],
+  managedBy: [{
+    user: { type: Schema.Types.ObjectId, ref: 'User' },
+    permissions: { type: String, enum: ['view', 'edit'], default: 'view' },
+    addedAt: { type: Date, default: Date.now }
+  }],
+  delegateInvites: [{
+    token: { type: String },
+    permissions: { type: String, enum: ['view', 'edit'], default: 'view' },
+    expiresAt: { type: Date },
+    createdAt: { type: Date, default: Date.now }
   }],
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },

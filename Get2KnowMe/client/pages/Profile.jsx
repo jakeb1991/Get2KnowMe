@@ -7,6 +7,22 @@ import QRCodeGenerator from "../components/QRCodeGenerator.jsx";
 import { usePassportData } from "../hooks/usePassportData.js";
 import '../styles/Home.css';
 
+const useManagedProfiles = () => {
+  const [managedProfiles, setManagedProfiles] = useState([]);
+  useEffect(() => {
+    if (!AuthService.loggedIn()) return;
+    const token = AuthService.getToken();
+    fetch('/api/delegate/managed', {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: 'include'
+    })
+      .then(r => r.ok ? r.json() : { managedProfiles: [] })
+      .then(d => setManagedProfiles(d.managedProfiles || []))
+      .catch(() => {});
+  }, []);
+  return managedProfiles;
+};
+
 const ONBOARDING_KEY = 'onboarding_seen';
 
 const Profile = () => {
@@ -40,8 +56,9 @@ const Profile = () => {
     user = null;
   }
 
-  // Use the optimized passport data hook
-  const { hasPassport, isLoading, displayName, passportCode } = usePassportData();
+  const { hasPassport, isLoading, displayName, passportCode, passportData } = usePassportData();
+  const managedProfiles = useManagedProfiles();
+  const viewCount = passportData?.passportViewCount || 0;
 
   // If no user, show a message (this page should be protected)
   if (!user) {
@@ -107,6 +124,16 @@ const Profile = () => {
                 </p>
               </div>
 
+              {/* View count stat */}
+              {hasPassport && viewCount > 0 && (
+                <div className="mb-4">
+                  <span className="text-muted" style={{ fontSize: '0.9rem' }}>
+                    <FontAwesomeIcon icon="eye" className="me-1" style={{ color: 'var(--primary-color)' }} />
+                    Your passport has been viewed <strong>{viewCount}</strong> {viewCount === 1 ? 'time' : 'times'}
+                  </span>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="cta-buttons">
                 {!hasPassport && (
@@ -131,6 +158,45 @@ const Profile = () => {
               </div>
             </Card.Body>
           </Card>
+
+          {/* Managed Profiles Card */}
+          {managedProfiles.length > 0 && (
+            <Card className="home-card mb-4">
+              <Card.Body className="p-4">
+                <h5>
+                  <FontAwesomeIcon icon="users" className="me-2" style={{ color: 'var(--primary-color)' }} />
+                  Profiles I Manage
+                </h5>
+                <p className="text-muted small mb-3">You have caregiver access to these passports.</p>
+                <Row>
+                  {managedProfiles.map(profile => (
+                    <Col md={6} key={profile._id} className="mb-3">
+                      <Link
+                        to={profile.passcode ? `/passport/view/${profile.passcode}` : '#'}
+                        className="quick-action-link"
+                      >
+                        <div className="quick-action-card">
+                          {profile.profilePhoto ? (
+                            <img
+                              src={profile.profilePhoto}
+                              alt={profile.displayName}
+                              style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <FontAwesomeIcon icon="id-card" />
+                          )}
+                          <span>{profile.displayName}</span>
+                          <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            {profile.permissions === 'edit' ? 'Can view & edit' : 'View only'}
+                          </small>
+                        </div>
+                      </Link>
+                    </Col>
+                  ))}
+                </Row>
+              </Card.Body>
+            </Card>
+          )}
 
           {/* Quick Actions Card */}
           {hasPassport && (

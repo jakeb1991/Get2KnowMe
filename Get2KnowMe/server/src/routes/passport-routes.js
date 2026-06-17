@@ -167,7 +167,15 @@ router.get('/public/:passcode', async (req, res) => {
       return res.status(404).json({ message: 'Communication passport not found' });
     }
 
+    // Increment view count (fire-and-forget, don't block response)
+    User.updateOne(
+      { _id: user._id },
+      { $inc: { 'communicationPassport.passportViewCount': 1 } }
+    ).catch(err => console.error('Error incrementing view count:', err));
+
     const publicPassport = {
+      ownerId: user._id,
+      ownerUsername: user.username,
       firstName: user.communicationPassport.firstName,
       lastName: user.communicationPassport.lastName,
       preferredName: user.communicationPassport.preferredName,
@@ -185,6 +193,8 @@ router.get('/public/:passcode', async (req, res) => {
       customPreferences: user.communicationPassport.customPreferences,
       trustedContact: user.communicationPassport.trustedContact,
       otherInformation: user.communicationPassport.otherInformation,
+      profilePhoto: user.communicationPassport.profilePhoto,
+      passportViewCount: (user.communicationPassport.passportViewCount || 0) + 1,
       updatedAt: user.communicationPassport.updatedAt
     };
 
@@ -193,6 +203,61 @@ router.get('/public/:passcode', async (req, res) => {
   } catch (error) {
     console.error('Error fetching public communication passport:', error);
     return res.status(500).json({ message: 'Error fetching communication passport' });
+  }
+});
+
+// GET /api/passport/managed/:userId - Get managed user's passport (delegate access)
+router.get('/managed/:userId', authenticateToken, async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    const requesterId = req.user._id;
+
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const isDelegateAllowed = targetUser.delegates.some(d => d.user.equals(requesterId));
+    if (!isDelegateAllowed) {
+      return res.status(403).json({ message: 'You do not have access to this passport' });
+    }
+
+    if (!targetUser.communicationPassport) {
+      return res.status(404).json({ message: 'This user has no communication passport' });
+    }
+
+    return res.json({ passport: targetUser.communicationPassport, owner: { _id: targetUser._id, username: targetUser.username } });
+  } catch (error) {
+    console.error('Error fetching managed passport:', error);
+    return res.status(500).json({ message: 'Error fetching passport' });
+  }
+});
+
+// POST /api/passport/create-for/:userId - Create/update passport for a managed user (edit delegates only)
+router.post('/create-for/:userId', authenticateToken, async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+    const requesterId = req.user._id;
+
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) return res.status(404).json({ message: 'User not found' });
+
+    const delegateRecord = targetUser.delegates.find(d => d.user.equals(requesterId));
+    if (!delegateRecord || delegateRecord.permissions !== 'edit') {
+      return res.status(403).json({ message: 'You do not have edit access to this passport' });
+    }
+
+    const passportData = req.body;
+    const cleanPasscode = passportData.profilePasscode?.replace(/-/g, '').toUpperCase();
+
+    const updatedUser = await User.findByIdAndUpdate(
+      targetUserId,
+      { $set: { communicationPassport: { ...passportData, profilePasscode: cleanPasscode, updatedAt: new Date() } } },
+      { new: true, runValidators: true }
+    );
+
+    return res.json({ message: 'Passport updated successfully', passport: updatedUser.communicationPassport });
+  } catch (error) {
+    console.error('Error updating managed passport:', error);
+    return res.status(500).json({ message: 'Error updating passport' });
   }
 });
 

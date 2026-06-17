@@ -20,7 +20,9 @@ const CommunicationPassport = ({
   isOwner = false,
   showTrustedContact,
   setShowTrustedContact,
-  passcode
+  passcode,
+  viewCount,
+  followButton
 }) => {
   // Helper functions
   const formatDate = (dateString) => {
@@ -82,7 +84,15 @@ const CommunicationPassport = ({
         <Card className="passport-display-card">
           <Card.Header className="passport-header text-center">
             <div className="passport-icon mb-2">
-              <img src={get2knowmeLogo} alt="Get2KnowMe Logo" className="get2knowme-logo" />
+              {passport.profilePhoto ? (
+                <img
+                  src={passport.profilePhoto}
+                  alt="Profile"
+                  className="passport-profile-photo"
+                />
+              ) : (
+                <img src={get2knowmeLogo} alt="Get2KnowMe Logo" className="get2knowme-logo" />
+              )}
             </div>
             <h2 className="passport-name">
               {passport.preferredName || passport.firstName} {passport.lastName}
@@ -95,6 +105,9 @@ const CommunicationPassport = ({
             <Badge bg="primary" className="passport-badge">
               Communication Passport
             </Badge>
+            {followButton && (
+              <div className="mt-3">{followButton}</div>
+            )}
           </Card.Header>
 
           <Card.Body className="p-4">
@@ -350,35 +363,41 @@ const CommunicationPassport = ({
 
             {/* Footer */}
             <div className="passport-footer mt-4 pt-3 border-top">
-              <div className="d-flex justify-content-between align-items-center">
-                <small className="text-muted">
-                  <FontAwesomeIcon icon="clock" />
-                  Last updated: {formatDate(passport.updatedAt)}
-                </small>
-                <div className="d-flex gap-2">
-                  {isOwner && (
-                    <>
-                      <Button
-                        variant="outline-info"
-                        size="sm"
-                        onClick={() => setShowQRModal(true)}
-                        title="Generate QR code for easy sharing"
-                        className="btn-secondary"
-                      >
-                        <FontAwesomeIcon icon="qrcode" className="me-1" />
-                        QR Code
-                      </Button>
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={() => window.print()}
-                        className="btn-secondary-reverse"
-                      >
-                        <FontAwesomeIcon icon="print" className="me-1" />
-                        Print
-                      </Button>
-                    </>
+              <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                  <small className="text-muted d-block">
+                    <FontAwesomeIcon icon="clock" className="me-1" />
+                    Last updated: {formatDate(passport.updatedAt)}
+                  </small>
+                  {viewCount > 0 && (
+                    <small className="text-muted">
+                      <FontAwesomeIcon icon="eye" className="me-1" />
+                      {viewCount} {viewCount === 1 ? 'view' : 'views'}
+                    </small>
                   )}
+                </div>
+                <div className="d-flex gap-2 no-print">
+                  {isOwner && (
+                    <Button
+                      variant="outline-info"
+                      size="sm"
+                      onClick={() => setShowQRModal(true)}
+                      title="Generate QR code for easy sharing"
+                      className="btn-secondary"
+                    >
+                      <FontAwesomeIcon icon="qrcode" className="me-1" />
+                      QR Code
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => window.print()}
+                    className="btn-secondary-reverse"
+                  >
+                    <FontAwesomeIcon icon="print" className="me-1" />
+                    Print / Save PDF
+                  </Button>
                 </div>
               </div>
             </div>

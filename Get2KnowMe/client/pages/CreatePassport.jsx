@@ -55,6 +55,7 @@ const CreatePassport = () => {
     },
     profilePasscode: "",
     otherInformation: "",
+    profilePhoto: "",
   });
 
   const [error, setError] = useState("");
@@ -64,6 +65,38 @@ const CreatePassport = () => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
   const alertRef = useRef(null);
+
+  const resizeImage = (file) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const max = 300;
+        const ratio = Math.min(max / img.width, max / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = url;
+    });
+
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Photo must be under 5MB");
+      return;
+    }
+    try {
+      const resized = await resizeImage(file);
+      setFormData(prev => ({ ...prev, profilePhoto: resized }));
+    } catch {
+      setError("Failed to process photo. Please try a different image.");
+    }
+  };
 
   const diagnosisOptions = [
     "Autism Spectrum Disorder (ASD)",
@@ -118,6 +151,7 @@ const CreatePassport = () => {
         const data = await response.json();
         const passportData = {
           ...data.passport,
+          profilePhoto: data.passport.profilePhoto || "",
           trustedContact: {
             ...data.passport.trustedContact,
             countryCode: data.passport.trustedContact?.countryCode || "GB",
@@ -134,7 +168,9 @@ const CreatePassport = () => {
   };
 
   const saveDraft = () => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+    // Exclude profilePhoto from draft (too large for localStorage)
+    const { profilePhoto, ...draftData } = formData;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
     setHasDraft(true);
     setSuccess("Draft saved! You can continue later.");
     setTimeout(() => setSuccess(""), 3000);
@@ -373,6 +409,42 @@ const CreatePassport = () => {
                           </Form.Group>
                         </Col>
                       </Row>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>Profile Photo <span className="text-muted small">(optional)</span></Form.Label>
+                        <Form.Text className="text-muted d-block mb-2">
+                          A photo helps people identify you quickly. It will be resized to a small thumbnail.
+                        </Form.Text>
+                        <div className="d-flex align-items-center gap-3">
+                          {formData.profilePhoto && (
+                            <img
+                              src={formData.profilePhoto}
+                              alt="Preview"
+                              style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--primary-color)' }}
+                            />
+                          )}
+                          <div>
+                            <Form.Control
+                              type="file"
+                              accept="image/*"
+                              onChange={handlePhotoChange}
+                              style={{ maxWidth: 280 }}
+                            />
+                            {formData.profilePhoto && (
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className="text-danger p-0 mt-1"
+                                onClick={() => setFormData(prev => ({ ...prev, profilePhoto: "" }))}
+                              >
+                                Remove photo
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </Form.Group>
                     </div>
 
                     <div className="form-section mb-3">

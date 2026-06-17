@@ -1,5 +1,36 @@
 /* Nav.css - Custom styling for navigation */
 
+/* Notification bell */
+.notification-bell-link {
+  position: relative;
+  padding-right: 0.5rem !important;
+}
+
+.notification-bell-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+
 /* Custom navbar styling */
 .custom-navbar {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

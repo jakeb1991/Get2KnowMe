@@ -70,6 +70,7 @@ const MyPassport = () => {
         setShowQRModal={setShowQRModal}
         isOwner={true}
         passcode={passport.profilePasscode}
+        viewCount={passport.passportViewCount}
       />
     </Container>
   );

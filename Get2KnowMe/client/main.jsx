@@ -49,6 +49,8 @@ const RegistrationPending = React.lazy(
 );
 const SubmitStory = React.lazy(() => import("./pages/SubmitStory.jsx"));
 const SocialDashboard = React.lazy(() => import("./components/SocialDashboard/SocialDashboard.jsx"));
+const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage.jsx"));
+const CaregiverSettings = React.lazy(() => import("./pages/settings/CaregiverSettings.jsx"));
 
 // Settings pages
 const SettingsOverview = React.lazy(
@@ -184,6 +186,20 @@ const router = createBrowserRouter([
             }
           >
             <SocialDashboard />
+          </Suspense>
+        ),
+      },
+      {
+        path: "notifications",
+        element: (
+          <Suspense
+            fallback={
+              <div className="d-flex justify-content-center p-4">
+                <div className="spinner-border" role="status"></div>
+              </div>
+            }
+          >
+            <NotificationsPage />
           </Suspense>
         ),
       },
@@ -329,6 +345,20 @@ const router = createBrowserRouter([
                 }
               >
                 <DangerZone />
+              </Suspense>
+            ),
+          },
+          {
+            path: "caregiver",
+            element: (
+              <Suspense
+                fallback={
+                  <div className="d-flex justify-content-center p-4">
+                    <div className="spinner-border" role="status"></div>
+                  </div>
+                }
+              >
+                <CaregiverSettings />
               </Suspense>
             ),
           },

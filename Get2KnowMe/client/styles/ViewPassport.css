@@ -269,26 +269,73 @@
   }
 }
 
+/* Profile photo in passport header */
+.passport-profile-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: block;
+  margin: 0 auto;
+}
+
+/* Follow button in passport header */
+.passport-follow-btn {
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.passport-follow-btn:hover {
+  transform: translateY(-1px);
+}
+
 /* Print Styles */
 @media print {
+  /* Hide everything except the passport card */
+  nav,
+  .navbar,
+  footer,
+  .alert,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
   .view-passport-container {
     background: white !important;
+    padding: 0 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .passport-display-card {
     box-shadow: none !important;
     border: 1px solid #ddd !important;
+    border-radius: 0 !important;
+    page-break-inside: avoid;
   }
-  
+
   .passport-header {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
-  .passport-footer .btn {
+
+  .passport-footer .btn,
+  .passport-footer .no-print {
     display: none !important;
+  }
+
+  .passport-profile-photo {
+    border: 2px solid #ccc !important;
   }
 }
 

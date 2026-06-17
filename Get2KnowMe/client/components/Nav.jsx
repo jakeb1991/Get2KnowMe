@@ -1,5 +1,5 @@
 // client/components/Nav.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Navbar, Nav as BsNav, Container } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,6 +18,32 @@ const NavTabs = () => {
     console.warn("Error getting user profile:", error);
     user = null;
   }
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchUnreadCount = async () => {
+      try {
+        const token = AuthService.getToken();
+        const res = await fetch('/api/notifications/counts', {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.totalUnread || 0);
+        }
+      } catch {
+        // silently ignore
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 60000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Function to close the navbar collapse (for mobile)
   const closeNavbar = () => {
@@ -166,6 +192,16 @@ const NavTabs = () => {
                       </Link>
                     </li>
                     <li>
+                      <Link
+                        className="dropdown-item"
+                        to="/settings/caregiver"
+                        onClick={closeNavbar}
+                      >
+                        <FontAwesomeIcon icon="users" className="dropdown-item-icon" />
+                        Caregiver Access
+                      </Link>
+                    </li>
+                    <li>
                       <hr className="dropdown-divider" />
                     </li>
                     <li>
@@ -211,6 +247,25 @@ const NavTabs = () => {
                 )}
               </ul>
             </li>
+
+            {/* Notification bell — logged in users only */}
+            {user && (
+              <BsNav.Link
+                as={Link}
+                to="/notifications"
+                active={currentPage === "/notifications"}
+                className="nav-item-custom notification-bell-link"
+                onClick={closeNavbar}
+                title="Notifications"
+              >
+                <span className="notification-bell-wrap">
+                  <FontAwesomeIcon icon="bell" />
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                  )}
+                </span>
+              </BsNav.Link>
+            )}
 
             {/* Authenticated user passport link OR Create Account for non-authenticated */}
             {user ? (

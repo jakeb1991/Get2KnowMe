@@ -413,4 +413,27 @@ router.post('/unblock/:userId', authenticateToken, userIdParamValidation, async 
   }
 });
 
+// Get follow relationship status with a specific user
+router.get('/status/:userId', authenticateToken, async (req, res) => {
+  try {
+    const targetUserId = req.params.userId;
+
+    if (req.user._id.toString() === targetUserId) {
+      return res.json({ isSelf: true, isFollowing: false, requestSent: false, isBlocked: false });
+    }
+
+    const currentUser = await User.findById(req.user._id)
+      .select('following sentFollowRequests blockedUsers');
+
+    const isFollowing = currentUser.following.some(f => f.user.equals(targetUserId));
+    const requestSent = currentUser.sentFollowRequests.some(r => r.to.equals(targetUserId));
+    const isBlocked = currentUser.blockedUsers.some(b => b.user.equals(targetUserId));
+
+    res.json({ isSelf: false, isFollowing, requestSent, isBlocked });
+  } catch (error) {
+    console.error('Follow status error:', error);
+    res.status(500).json({ error: 'Failed to get follow status' });
+  }
+});
+
 export default router;
