@@ -1,6 +1,5 @@
 import { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-import { fieldEncryption } from "mongoose-field-encryption";
 
 // Communication Passport subdocument schema
 const communicationPassportSchema = new Schema({
@@ -100,37 +99,6 @@ const communicationPassportSchema = new Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
-communicationPassportSchema.plugin(fieldEncryption, {
-  fields: [
-    'firstName',
-    'lastName',
-    'preferredName',
-    'preferredPronouns',
-    'customPronouns',
-    'diagnosis',
-    'diagnoses',
-    'customDiagnosis',
-    'healthAlert',
-    'customHealthAlert',
-    'allergyList',
-    'communicationPreferences',
-    'customPreferences',
-    'triggers',
-    'likes',
-    'dislikes',
-    'trustedContact',
-    'profilePasscode',
-    'otherInformation',
-    'communicationMethod',
-    'avoidWords',
-    'medications',
-    'calmingStrategies',
-    'distressSigns',
-    'sensoryNeeds'
-  ],
-  secret: process.env.FIELD_ENCRYPTION_SECRET,
-  saltGenerator: secret => secret.slice(0, 16)
-});
 
 const userSchema = new Schema({
   email: {
