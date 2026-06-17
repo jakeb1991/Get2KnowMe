@@ -56,13 +56,18 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
     }
     passportData.trustedContact.phone = normalizedPhone;
 
-    // Update user
+    // Extract profilePhoto separately — saves via dot-notation to avoid
+    // subdocument-replacement interference with the field-encryption plugin's
+    // pre('findOneAndUpdate') hook on communicationPassportSchema.
+    const { profilePhoto, ...passportWithoutPhoto } = passportData;
+
+    // Update passport (without profilePhoto)
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         $set: {
           communicationPassport: {
-            ...passportData,
+            ...passportWithoutPhoto,
             profilePasscode: cleanPasscode,
             updatedAt: new Date()
           }
@@ -70,6 +75,17 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
       },
       { new: true, runValidators: true }
     );
+
+    // Save photo separately using dot-notation (bypasses subdocument replacement)
+    if (typeof profilePhoto !== 'undefined') {
+      await User.updateOne(
+        { _id: userId },
+        { $set: { 'communicationPassport.profilePhoto': profilePhoto } }
+      );
+      if (updatedUser?.communicationPassport) {
+        updatedUser.communicationPassport.profilePhoto = profilePhoto;
+      }
+    }
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
