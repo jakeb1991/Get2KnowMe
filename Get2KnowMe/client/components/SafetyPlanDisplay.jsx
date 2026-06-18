@@ -78,6 +78,22 @@ const SafetyPlanDisplay = ({ plan, isOwner = false }) => {
           </Card.Header>
 
           <Card.Body className="p-4">
+            {/* Things of Hope */}
+            {plan.thingsOfHope && plan.thingsOfHope.trim() !== "" && (
+              <div className="safety-plan-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon
+                    icon="star"
+                    className="section-icon text-warning"
+                  />
+                  <h4 className="section-title">Things That Give Me Hope</h4>
+                </div>
+                <div className="section-content">
+                  <div className="likes-box">{plan.thingsOfHope}</div>
+                </div>
+              </div>
+            )}
+
             {/* Warning Signs */}
             {plan.warningSigns && plan.warningSigns.trim() !== "" && (
               <div className="safety-plan-section mb-4">
@@ -166,6 +182,22 @@ const SafetyPlanDisplay = ({ plan, isOwner = false }) => {
                 </div>
                 <div className="section-content">
                   <div className="other-info-box">{plan.safeSpaces}</div>
+                </div>
+              </div>
+            )}
+
+            {/* Things I can do to keep myself safe */}
+            {plan.safetyActions && plan.safetyActions.trim() !== "" && (
+              <div className="safety-plan-section mb-4">
+                <div className="section-header">
+                  <FontAwesomeIcon
+                    icon="shield-alt"
+                    className="section-icon text-danger"
+                  />
+                  <h4 className="section-title">Things I Can Do to Keep Myself Safe</h4>
+                </div>
+                <div className="section-content">
+                  <div className="other-info-box">{plan.safetyActions}</div>
                 </div>
               </div>
             )}

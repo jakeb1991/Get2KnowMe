@@ -101,8 +101,10 @@ const communicationPassportSchema = new Schema({
 
 
 const safetyPlanSchema = new Schema({
+  thingsOfHope: { type: String, trim: true },
   warningSigns: { type: String, trim: true },
   triggers: { type: String, trim: true },
+  safetyActions: { type: String, trim: true },
   whatToDo: { type: String, trim: true },
   whatNotToDo: { type: String, trim: true },
   safeSpaces: { type: String, trim: true },

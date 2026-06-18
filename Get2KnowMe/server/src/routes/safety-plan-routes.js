@@ -9,8 +9,8 @@ const router = express.Router();
 
 // Freetext fields encrypted at rest
 const ENCRYPTED_FREETEXT_FIELDS = [
-  'warningSigns', 'triggers', 'whatToDo', 'whatNotToDo',
-  'safeSpaces', 'afterCrisisNeeds'
+  'thingsOfHope', 'warningSigns', 'triggers', 'safetyActions',
+  'whatToDo', 'whatNotToDo', 'safeSpaces', 'afterCrisisNeeds'
 ];
 
 /**
@@ -179,8 +179,10 @@ router.get('/view/:passcode', async (req, res) => {
     const publicPlan = {
       ownerId: user._id,
       ownerUsername: user.username,
+      thingsOfHope: p.thingsOfHope,
       warningSigns: p.warningSigns,
       triggers: p.triggers,
+      safetyActions: p.safetyActions,
       whatToDo: p.whatToDo,
       whatNotToDo: p.whatNotToDo,
       safeSpaces: p.safeSpaces,

@@ -42,8 +42,10 @@ const CreateSafetyPlan = () => {
   const alertRef = useRef(null);
 
   const [formData, setFormData] = useState({
+    thingsOfHope: "",
     warningSigns: "",
     triggers: "",
+    safetyActions: "",
     whatToDo: "",
     whatNotToDo: "",
     safeSpaces: "",
@@ -243,6 +245,23 @@ const CreateSafetyPlan = () => {
 
                     <div className="form-section mb-3">
                       <Form.Group>
+                        <Form.Label>Things that give me hope</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={4}
+                          name="thingsOfHope"
+                          value={formData.thingsOfHope}
+                          onChange={handleInputChange}
+                          placeholder="Things you love, look forward to, or find uplifting — reasons to keep going. e.g. My family, my pet, the feeling after a walk, music..."
+                        />
+                        <Form.Text className="text-muted">
+                          Your personal strengths, reasons for hope, and protective factors.
+                        </Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
                         <Form.Label>Warning Signs</Form.Label>
                         <Form.Control
                           as="textarea"
@@ -331,6 +350,23 @@ const CreateSafetyPlan = () => {
                         />
                         <Form.Text className="text-muted">
                           Places or objects that bring calm and safety.
+                        </Form.Text>
+                      </Form.Group>
+                    </div>
+
+                    <div className="form-section mb-3">
+                      <Form.Group>
+                        <Form.Label>Things I can do to keep myself safe</Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={4}
+                          name="safetyActions"
+                          value={formData.safetyActions}
+                          onChange={handleInputChange}
+                          placeholder="Steps to make your environment safer. e.g. Give my car keys to a trusted person, ask someone to stay with me, go somewhere with other people, remove items I could use to harm myself..."
+                        />
+                        <Form.Text className="text-muted">
+                          Practical actions to reduce risk and keep yourself safe during a crisis.
                         </Form.Text>
                       </Form.Group>
                     </div>
