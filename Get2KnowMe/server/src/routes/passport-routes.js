@@ -3,13 +3,81 @@ import express from 'express';
 import { validatePassportData } from '../middleware/passportValidator.js';
 import { normalizePhoneNumber } from '../utils/phoneNormalization.js';
 import User from '../models/User.js';
-import { generateFriendlyPasscode, validatePasscode } from '../utils/passcodeGenerator.js';
+import { generateFriendlyPasscode } from '../utils/passcodeGenerator.js';
 import { authenticateToken } from '../utils/auth.js';
 import { passportUpdateMiddleware } from '../middleware/passportTracking.js';
+import { encrypt, decrypt } from '../utils/encryption.js';
 
 const router = express.Router();
 
-// GET /api/passport/generate-passcode - Generate a new passcode
+// Freetext string fields that are encrypted at rest.
+// Arrays (diagnoses, healthAlert, communicationPreferences) and the passcode
+// are left as plaintext — arrays are enum values defined in code, and the
+// passcode is a public shareable identifier used for DB lookups.
+const ENCRYPTED_STRING_FIELDS = [
+  'firstName', 'lastName', 'preferredName', 'customPronouns',
+  'customDiagnosis', 'customHealthAlert', 'allergyList', 'customPreferences',
+  'triggers', 'likes', 'dislikes', 'otherInformation',
+  'communicationMethod', 'avoidWords', 'medications', 'calmingStrategies',
+  'distressSigns', 'sensoryNeeds'
+];
+
+const PLAIN_FIELDS = [
+  'preferredPronouns', 'diagnoses', 'healthAlert', 'communicationPreferences'
+];
+
+function encryptPassportForSave(passportData, cleanPasscode) {
+  const dotUpdate = {};
+
+  for (const field of ENCRYPTED_STRING_FIELDS) {
+    if (field in passportData) {
+      dotUpdate[`communicationPassport.${field}`] = encrypt(passportData[field]);
+    }
+  }
+
+  for (const field of PLAIN_FIELDS) {
+    if (field in passportData) {
+      dotUpdate[`communicationPassport.${field}`] = passportData[field];
+    }
+  }
+
+  // Encrypt sensitive trusted contact sub-fields individually
+  if (passportData.trustedContact) {
+    dotUpdate['communicationPassport.trustedContact'] = {
+      countryCode: passportData.trustedContact.countryCode,
+      name: encrypt(passportData.trustedContact.name),
+      phone: encrypt(passportData.trustedContact.phone),
+      email: encrypt(passportData.trustedContact.email || ''),
+    };
+  }
+
+  dotUpdate['communicationPassport.profilePasscode'] = cleanPasscode;
+  dotUpdate['communicationPassport.updatedAt'] = new Date();
+
+  return dotUpdate;
+}
+
+function decryptPassport(raw) {
+  if (!raw) return raw;
+  const p = raw.toObject ? raw.toObject() : { ...raw };
+
+  for (const field of ENCRYPTED_STRING_FIELDS) {
+    if (p[field]) p[field] = decrypt(p[field]);
+  }
+
+  if (p.trustedContact) {
+    p.trustedContact = {
+      ...p.trustedContact,
+      name: decrypt(p.trustedContact.name),
+      phone: decrypt(p.trustedContact.phone),
+      email: decrypt(p.trustedContact.email),
+    };
+  }
+
+  return p;
+}
+
+// GET /api/passport/generate-passcode
 router.get('/generate-passcode', (req, res) => {
   try {
     const passcode = generateFriendlyPasscode();
@@ -20,83 +88,54 @@ router.get('/generate-passcode', (req, res) => {
   }
 });
 
-// POST /api/passport/create - Create or update communication passport (protected route)
-// Added passportUpdateMiddleware to track changes and notify followers
+// POST /api/passport/create
 router.post('/create', authenticateToken, passportUpdateMiddleware, validatePassportData, async (req, res) => {
   try {
-    const userId = req.user._id; // Assuming authenticateTokenMiddleware sets req.user
-
+    const userId = req.user._id;
     const passportData = req.body;
 
-    // Validate and clean the passcode
-    if (!passportData.profilePasscode || typeof passportData.profilePasscode !== 'string' || !passportData.profilePasscode.trim()) {
-      return res.status(400).json({
-        message: 'ProfilePasscode is required and cannot be empty.'
-      });
+    if (!passportData.profilePasscode || !passportData.profilePasscode.trim()) {
+      return res.status(400).json({ message: 'ProfilePasscode is required and cannot be empty.' });
     }
 
-    // Clean and normalize the passcode
     const cleanPasscode = passportData.profilePasscode.replace(/-/g, '').toUpperCase();
 
-    // Check passcode uniqueness
     const existingPasscode = await User.findOne({
       'communicationPassport.profilePasscode': cleanPasscode,
       _id: { $ne: userId }
     });
     if (existingPasscode) {
-      return res.status(400).json({
-        message: 'This passcode is already in use. Please choose a different one.'
-      });
+      return res.status(400).json({ message: 'This passcode is already in use. Please choose a different one.' });
     }
 
-    // Normalize the trusted contact phone number
     const normalizedPhone = normalizePhoneNumber(passportData.trustedContact.phone, passportData.trustedContact.countryCode);
     if (!normalizedPhone) {
       return res.status(400).json({ message: 'Failed to normalize trusted contact phone number.' });
     }
     passportData.trustedContact.phone = normalizedPhone;
 
-    const passportFields = [
-      'firstName', 'lastName', 'preferredName', 'preferredPronouns', 'customPronouns',
-      'diagnoses', 'customDiagnosis', 'healthAlert', 'customHealthAlert', 'allergyList',
-      'communicationPreferences', 'customPreferences', 'triggers', 'likes', 'dislikes',
-      'trustedContact', 'otherInformation', 'communicationMethod', 'avoidWords',
-      'medications', 'calmingStrategies', 'distressSigns', 'sensoryNeeds'
-    ];
+    const dotUpdate = encryptPassportForSave(passportData, cleanPasscode);
 
-    const dotUpdate = {};
-    for (const field of passportFields) {
-      if (field in passportData) {
-        dotUpdate[`communicationPassport.${field}`] = passportData[field];
-      }
-    }
-    dotUpdate['communicationPassport.profilePasscode'] = cleanPasscode;
-    dotUpdate['communicationPassport.updatedAt'] = new Date();
-
-    // profilePhoto at top-level userSchema — never inside the passport subdocument
+    // profilePhoto lives at top-level userSchema — never inside the encrypted subdocument
     if (typeof passportData.profilePhoto !== 'undefined') {
       dotUpdate['profilePhoto'] = passportData.profilePhoto;
     }
 
+    // runValidators disabled — passport fields are validated by passportValidator middleware,
+    // and encrypted values would fail schema regex validators (e.g. email match)
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: dotUpdate },
-      { new: true, runValidators: true }
+      { new: true }
     );
 
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
 
-    // Notify all followers of passport update
+    // Notify followers
     try {
       const userWithFollowers = await User.findById(userId).select('followers username communicationPassport.profilePasscode');
       const passcode = updatedUser.communicationPassport?.profilePasscode;
-      console.log('[Passport Update] Notifying followers:', {
-        userId,
-        username: updatedUser.username,
-        passcode,
-        followers: userWithFollowers?.followers?.length
-      });
-      if (userWithFollowers && userWithFollowers.followers && userWithFollowers.followers.length > 0 && passcode) {
+      if (userWithFollowers?.followers?.length > 0 && passcode) {
         const Notification = (await import('../models/Notification.js')).default;
         const notifications = userWithFollowers.followers.map(followerObj => ({
           recipient: followerObj.user,
@@ -107,20 +146,15 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
           data: { passcode },
           createdAt: new Date()
         }));
-        console.log('[Passport Update] Creating notifications:', notifications);
         await Notification.insertMany(notifications);
-        console.log('[Passport Update] Notifications inserted successfully');
-      } else {
-        console.warn('[Passport Update] No followers to notify or missing passcode.');
       }
     } catch (notifyErr) {
       console.error('Error sending passport update notifications:', notifyErr);
-      // Don't block user update on notification failure
     }
 
     return res.json({
       message: 'Communication passport saved successfully',
-      passport: updatedUser.communicationPassport
+      passport: decryptPassport(updatedUser.communicationPassport)
     });
 
   } catch (error) {
@@ -129,21 +163,21 @@ router.post('/create', authenticateToken, passportUpdateMiddleware, validatePass
   }
 });
 
-// GET /api/passport/my-passport - Get current user's communication passport (protected route)
+// GET /api/passport/my-passport
 router.get('/my-passport', authenticateToken, async (req, res) => {
   try {
     const userId = req.user._id;
     const foundUser = await User.findById(userId);
-    
+
     if (!foundUser) return res.status(404).json({ message: 'User not found' });
-    
+
     if (!foundUser.communicationPassport ||
         Object.keys(foundUser.communicationPassport).length === 0) {
       return res.status(404).json({ message: 'Communication passport not found' });
     }
 
     return res.json({
-      passport: foundUser.communicationPassport,
+      passport: decryptPassport(foundUser.communicationPassport),
       profilePhoto: foundUser.profilePhoto || null
     });
   } catch (error) {
@@ -152,17 +186,15 @@ router.get('/my-passport', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/passport/public/:passcode - Get communication passport by passcode (public route)
+// GET /api/passport/public/:passcode
 router.get('/public/:passcode', async (req, res) => {
   try {
     const { passcode } = req.params;
 
-    // Validate passcode parameter
-    if (!passcode || typeof passcode !== 'string' || !passcode.trim()) {
+    if (!passcode || !passcode.trim()) {
       return res.status(400).json({ message: 'Invalid passcode parameter.' });
     }
 
-    // Clean passcode (remove dashes, convert to uppercase)
     const cleanPasscode = passcode.replace(/-/g, '').toUpperCase();
 
     let user = await User.findOne({
@@ -181,41 +213,42 @@ router.get('/public/:passcode', async (req, res) => {
       return res.status(404).json({ message: 'Communication passport not found' });
     }
 
-    // Increment view count (fire-and-forget, don't block response)
     User.updateOne(
       { _id: user._id },
       { $inc: { 'communicationPassport.passportViewCount': 1 } }
     ).catch(err => console.error('Error incrementing view count:', err));
 
+    const p = decryptPassport(user.communicationPassport);
+
     const publicPassport = {
       ownerId: user._id,
       ownerUsername: user.username,
-      firstName: user.communicationPassport.firstName,
-      lastName: user.communicationPassport.lastName,
-      preferredName: user.communicationPassport.preferredName,
-      preferredPronouns: user.communicationPassport.preferredPronouns,
-      customPronouns: user.communicationPassport.customPronouns,
-      diagnoses: user.communicationPassport.diagnoses,
-      customDiagnosis: user.communicationPassport.customDiagnosis,
-      healthAlert: user.communicationPassport.healthAlert,
-      customHealthAlert: user.communicationPassport.customHealthAlert,
-      allergyList: user.communicationPassport.allergyList,
-      triggers: user.communicationPassport.triggers,
-      likes: user.communicationPassport.likes,
-      dislikes: user.communicationPassport.dislikes,
-      communicationPreferences: user.communicationPassport.communicationPreferences,
-      customPreferences: user.communicationPassport.customPreferences,
-      trustedContact: user.communicationPassport.trustedContact,
-      otherInformation: user.communicationPassport.otherInformation,
-      communicationMethod: user.communicationPassport.communicationMethod,
-      avoidWords: user.communicationPassport.avoidWords,
-      medications: user.communicationPassport.medications,
-      calmingStrategies: user.communicationPassport.calmingStrategies,
-      distressSigns: user.communicationPassport.distressSigns,
-      sensoryNeeds: user.communicationPassport.sensoryNeeds,
+      firstName: p.firstName,
+      lastName: p.lastName,
+      preferredName: p.preferredName,
+      preferredPronouns: p.preferredPronouns,
+      customPronouns: p.customPronouns,
+      diagnoses: p.diagnoses,
+      customDiagnosis: p.customDiagnosis,
+      healthAlert: p.healthAlert,
+      customHealthAlert: p.customHealthAlert,
+      allergyList: p.allergyList,
+      triggers: p.triggers,
+      likes: p.likes,
+      dislikes: p.dislikes,
+      communicationPreferences: p.communicationPreferences,
+      customPreferences: p.customPreferences,
+      trustedContact: p.trustedContact,
+      otherInformation: p.otherInformation,
+      communicationMethod: p.communicationMethod,
+      avoidWords: p.avoidWords,
+      medications: p.medications,
+      calmingStrategies: p.calmingStrategies,
+      distressSigns: p.distressSigns,
+      sensoryNeeds: p.sensoryNeeds,
       profilePhoto: user.profilePhoto || null,
-      passportViewCount: (user.communicationPassport.passportViewCount || 0) + 1,
-      updatedAt: user.communicationPassport.updatedAt
+      passportViewCount: (p.passportViewCount || 0) + 1,
+      updatedAt: p.updatedAt
     };
 
     return res.json({ passport: publicPassport });
@@ -226,7 +259,7 @@ router.get('/public/:passcode', async (req, res) => {
   }
 });
 
-// GET /api/passport/managed/:userId - Get managed user's passport (delegate access)
+// GET /api/passport/managed/:userId
 router.get('/managed/:userId', authenticateToken, async (req, res) => {
   try {
     const targetUserId = req.params.userId;
@@ -244,14 +277,18 @@ router.get('/managed/:userId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'This user has no communication passport' });
     }
 
-    return res.json({ passport: targetUser.communicationPassport, owner: { _id: targetUser._id, username: targetUser.username } });
+    return res.json({
+      passport: decryptPassport(targetUser.communicationPassport),
+      profilePhoto: targetUser.profilePhoto || null,
+      owner: { _id: targetUser._id, username: targetUser.username }
+    });
   } catch (error) {
     console.error('Error fetching managed passport:', error);
     return res.status(500).json({ message: 'Error fetching passport' });
   }
 });
 
-// POST /api/passport/create-for/:userId - Create/update passport for a managed user (edit delegates only)
+// POST /api/passport/create-for/:userId
 router.post('/create-for/:userId', authenticateToken, async (req, res) => {
   try {
     const targetUserId = req.params.userId;
@@ -268,26 +305,41 @@ router.post('/create-for/:userId', authenticateToken, async (req, res) => {
     const passportData = req.body;
     const cleanPasscode = passportData.profilePasscode?.replace(/-/g, '').toUpperCase();
 
+    const normalizedPhone = normalizePhoneNumber(
+      passportData.trustedContact?.phone,
+      passportData.trustedContact?.countryCode
+    );
+    if (normalizedPhone) passportData.trustedContact.phone = normalizedPhone;
+
+    const dotUpdate = encryptPassportForSave(passportData, cleanPasscode);
+
+    if (typeof passportData.profilePhoto !== 'undefined') {
+      dotUpdate['profilePhoto'] = passportData.profilePhoto;
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       targetUserId,
-      { $set: { communicationPassport: { ...passportData, profilePasscode: cleanPasscode, updatedAt: new Date() } } },
-      { new: true, runValidators: true }
+      { $set: dotUpdate },
+      { new: true }
     );
 
-    return res.json({ message: 'Passport updated successfully', passport: updatedUser.communicationPassport });
+    return res.json({
+      message: 'Passport updated successfully',
+      passport: decryptPassport(updatedUser.communicationPassport)
+    });
   } catch (error) {
     console.error('Error updating managed passport:', error);
     return res.status(500).json({ message: 'Error updating passport' });
   }
 });
 
-// DELETE /api/passport/delete - Delete communication passport (protected route)
+// DELETE /api/passport/delete
 router.delete('/delete', authenticateToken, async (req, res) => {
   try {
     const userId = req.user._id;
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $unset: { communicationPassport: "" } },
+      { $unset: { communicationPassport: '' } },
       { new: true }
     );
     if (!updatedUser) return res.status(404).json({ message: 'User not found' });
