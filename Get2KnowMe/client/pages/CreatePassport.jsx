@@ -108,21 +108,69 @@ const CreatePassport = () => {
     }
   };
 
-  const diagnosisOptions = [
-    "Autism Spectrum Disorder (ASD)",
-    "Attention Deficit Hyperactivity Disorder (ADHD)",
-    "Obsessive-Compulsive Disorder (OCD)",
-    "Dyslexia",
-    "Dyscalculia",
-    "Tourette's Syndrome",
-    "C-PTSD (Complex PTSD)",
-    "Anxiety",
-    "Pathological Demand Avoidance (PDA)",
-    "Cerebral Palsy",
-    "Down Syndrome",
-    "Acquired Brain Injury",
-    "No Diagnosis",
-    "Other",
+  const diagnosisGroups = [
+    {
+      category: "Neurodevelopmental",
+      options: [
+        "Autism Spectrum Disorder (ASD)",
+        "Attention Deficit Hyperactivity Disorder (ADHD)",
+        "Pathological Demand Avoidance (PDA)",
+        "Tourette's Syndrome",
+        "Dyslexia",
+        "Dyscalculia",
+      ],
+    },
+    {
+      category: "Communication Disorders",
+      options: [
+        "Aphasia",
+        "Apraxia of Speech",
+        "Selective Mutism",
+        "Stammering / Stuttering",
+      ],
+    },
+    {
+      category: "Sensory Conditions",
+      options: [
+        "Deaf / Hearing Impairment",
+        "Hard of Hearing",
+        "Blind / Visual Impairment",
+        "Partially Sighted",
+      ],
+    },
+    {
+      category: "Mental Health",
+      options: [
+        "Anxiety",
+        "Depression",
+        "Bipolar Disorder",
+        "Schizophrenia / Psychosis",
+        "Obsessive-Compulsive Disorder (OCD)",
+        "Post-Traumatic Stress Disorder (PTSD)",
+        "C-PTSD (Complex PTSD)",
+        "Borderline Personality Disorder (BPD / EUPD)",
+        "Eating Disorder",
+      ],
+    },
+    {
+      category: "Substance Use",
+      options: [
+        "Alcohol Use Disorder",
+        "Drug / Substance Dependency",
+      ],
+    },
+    {
+      category: "Neurological & Physical",
+      options: [
+        "Cerebral Palsy",
+        "Down Syndrome",
+        "Acquired Brain Injury",
+      ],
+    },
+    {
+      category: "Other",
+      options: ["No Diagnosis", "Other"],
+    },
   ];
 
   const healthAlertOptions = [
@@ -474,19 +522,28 @@ const CreatePassport = () => {
                           Select all that apply. Choosing "No Diagnosis" will deselect others.
                         </Form.Text>
                         <div className="preferences-container">
-                          {diagnosisOptions.map((option) => {
+                          {diagnosisGroups.map((group) => {
                             const noDiagnosisSelected = formData.diagnoses.includes("No Diagnosis");
-                            const isDisabled = option !== "No Diagnosis" && noDiagnosisSelected;
                             return (
-                              <div key={option} className="mb-2">
-                                <Form.Check
-                                  type="checkbox"
-                                  id={`diagnosis-${option}`}
-                                  label={option}
-                                  checked={formData.diagnoses.includes(option)}
-                                  onChange={() => handleDiagnosisChange(option)}
-                                  disabled={isDisabled}
-                                />
+                              <div key={group.category} className="mb-3">
+                                <small className="fw-semibold text-muted text-uppercase d-block mb-1" style={{ letterSpacing: "0.05em", fontSize: "0.7rem" }}>
+                                  {group.category}
+                                </small>
+                                {group.options.map((option) => {
+                                  const isDisabled = option !== "No Diagnosis" && noDiagnosisSelected;
+                                  return (
+                                    <div key={option} className="mb-1">
+                                      <Form.Check
+                                        type="checkbox"
+                                        id={`diagnosis-${option}`}
+                                        label={option}
+                                        checked={formData.diagnoses.includes(option)}
+                                        onChange={() => handleDiagnosisChange(option)}
+                                        disabled={isDisabled}
+                                      />
+                                    </div>
+                                  );
+                                })}
                               </div>
                             );
                           })}

@@ -22,18 +22,41 @@ const communicationPassportSchema = new Schema({
   diagnoses: [{
     type: String,
     enum: [
+      // Neurodevelopmental
       'Autism Spectrum Disorder (ASD)',
       'Attention Deficit Hyperactivity Disorder (ADHD)',
-      'Obsessive-Compulsive Disorder (OCD)',
+      'Pathological Demand Avoidance (PDA)',
+      'Tourette\'s Syndrome',
       'Dyslexia',
       'Dyscalculia',
-      'Tourette\'s Syndrome',
-      'C-PTSD (Complex PTSD)',
+      // Communication Disorders
+      'Aphasia',
+      'Apraxia of Speech',
+      'Selective Mutism',
+      'Stammering / Stuttering',
+      // Sensory Conditions
+      'Deaf / Hearing Impairment',
+      'Hard of Hearing',
+      'Blind / Visual Impairment',
+      'Partially Sighted',
+      // Mental Health
       'Anxiety',
-      'Pathological Demand Avoidance (PDA)',
+      'Depression',
+      'Bipolar Disorder',
+      'Schizophrenia / Psychosis',
+      'Obsessive-Compulsive Disorder (OCD)',
+      'Post-Traumatic Stress Disorder (PTSD)',
+      'C-PTSD (Complex PTSD)',
+      'Borderline Personality Disorder (BPD / EUPD)',
+      'Eating Disorder',
+      // Substance Use
+      'Alcohol Use Disorder',
+      'Drug / Substance Dependency',
+      // Neurological & Physical
       'Cerebral Palsy',
       'Down Syndrome',
       'Acquired Brain Injury',
+      // Other
       'No Diagnosis',
       'Other'
     ]
