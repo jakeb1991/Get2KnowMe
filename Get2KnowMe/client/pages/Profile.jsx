@@ -198,6 +198,37 @@ const Profile = () => {
             </Card>
           )}
 
+          {/* Safety & Crisis Plan Card */}
+          <Card className="home-card mb-4">
+            <Card.Body className="p-4">
+              <h5>
+                <FontAwesomeIcon icon="shield-alt" className="me-2" style={{ color: '#dc3545' }} />
+                Safety &amp; Crisis Plan
+              </h5>
+              <p className="text-muted small mb-3">
+                A private document to help others support you during a difficult time.
+              </p>
+              <Row>
+                <Col md={6} className="mb-3">
+                  <Link to="/my-safety-plan" className="quick-action-link">
+                    <div className="quick-action-card">
+                      <FontAwesomeIcon icon="eye" />
+                      <span>View My Safety Plan</span>
+                    </div>
+                  </Link>
+                </Col>
+                <Col md={6} className="mb-3">
+                  <Link to="/create-safety-plan" className="quick-action-link">
+                    <div className="quick-action-card">
+                      <FontAwesomeIcon icon="edit" />
+                      <span>Create / Edit Safety Plan</span>
+                    </div>
+                  </Link>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+
           {/* Quick Actions Card */}
           {hasPassport && (
             <Card className="home-card">

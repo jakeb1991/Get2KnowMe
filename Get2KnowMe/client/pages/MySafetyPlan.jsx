@@ -18,6 +18,11 @@ const MySafetyPlan = () => {
         const res = await fetch("/api/safety-plan/my-plan", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (res.status === 404) {
+          // No plan created yet — show the create prompt, not an error
+          setPlan(null);
+          return;
+        }
         if (!res.ok) throw new Error("Failed to fetch safety plan");
         const data = await res.json();
         setPlan(data.plan);
