@@ -70,7 +70,20 @@ const CreateSafetyPlan = () => {
       });
       if (response.ok) {
         const data = await response.json();
+        // Spread defaults first so any field missing from the server response
+        // (e.g. newly added fields not yet in an older saved plan) stays as ""
+        // rather than undefined, which would make those inputs uncontrolled.
         const planData = {
+          thingsOfHope: "",
+          warningSigns: "",
+          triggers: "",
+          safetyActions: "",
+          whatToDo: "",
+          whatNotToDo: "",
+          safeSpaces: "",
+          safeContacts: [],
+          afterCrisisNeeds: "",
+          crisisPasscode: "",
           ...data.plan,
           safeContacts: (data.plan.safeContacts || []).map((c) => ({
             ...c,
