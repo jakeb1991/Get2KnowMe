@@ -66,7 +66,9 @@ import {
   faChevronDown,
   faUserFriends,
   faMapMarkerAlt,
-  faPlus
+  faPlus,
+  faShareAlt,
+  faLink
 } from '@fortawesome/free-solid-svg-icons';
 
 // Tell FontAwesome to skip adding the CSS automatically 
@@ -140,7 +142,9 @@ library.add(
   faChevronDown,
   faUserFriends,
   faMapMarkerAlt,
-  faPlus
+  faPlus,
+  faShareAlt,
+  faLink
 );
 
 export default config;

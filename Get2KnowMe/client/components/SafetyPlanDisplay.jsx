@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   Row,
   Col,
@@ -6,18 +6,55 @@ import {
   Badge,
   Alert,
   Button,
+  Modal,
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import QRCode from "qrcode";
 import "../styles/SafetyPlan.css";
 import "../styles/ViewPassport.css";
 
-const SafetyPlanDisplay = ({
-  plan,
-  isOwner = false,
-  showQRModal,
-  setShowQRModal,
-}) => {
+const SafetyPlanDisplay = ({ plan, isOwner = false }) => {
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [qrDataURL, setQrDataURL] = useState("");
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const shareURL = plan?.crisisPasscode
+    ? `${window.location.origin}/safety-plan/view/${plan.crisisPasscode}`
+    : null;
+
+  const openShareModal = useCallback(async () => {
+    setShowShareModal(true);
+    if (shareURL && !qrDataURL) {
+      try {
+        const url = await QRCode.toDataURL(shareURL, {
+          width: 280,
+          margin: 2,
+          color: { dark: "#c0392b", light: "#ffffff" },
+        });
+        setQrDataURL(url);
+      } catch {
+        // QR generation failure is non-fatal — link still works
+      }
+    }
+  }, [shareURL, qrDataURL]);
+
+  const handleCopyLink = () => {
+    if (!shareURL) return;
+    navigator.clipboard.writeText(shareURL).then(() => {
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2500);
+    });
+  };
+
+  const downloadQR = () => {
+    if (!qrDataURL) return;
+    const a = document.createElement("a");
+    a.href = qrDataURL;
+    a.download = "safety-plan-qr-code.png";
+    a.click();
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -224,6 +261,16 @@ const SafetyPlanDisplay = ({
                       Edit Plan
                     </Link>
                   )}
+                  {isOwner && shareURL && (
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={openShareModal}
+                    >
+                      <FontAwesomeIcon icon="share-alt" className="me-1" />
+                      Share
+                    </Button>
+                  )}
                   <Button
                     variant="outline-secondary"
                     size="sm"
@@ -234,6 +281,20 @@ const SafetyPlanDisplay = ({
                   </Button>
                 </div>
               </div>
+
+              {/* Prompt to set passcode if owner has none */}
+              {isOwner && !shareURL && (
+                <div className="mt-2 no-print">
+                  <small className="text-muted">
+                    <FontAwesomeIcon icon="link" className="me-1" />
+                    No sharing passcode set.{" "}
+                    <Link to="/create-safety-plan" className="text-danger">
+                      Edit your plan
+                    </Link>{" "}
+                    to add one and enable sharing.
+                  </small>
+                </div>
+              )}
             </div>
           </Card.Body>
         </Card>
@@ -245,6 +306,71 @@ const SafetyPlanDisplay = ({
           person&apos;s care.
         </Alert>
       </Col>
+
+      {/* Share Modal */}
+      <Modal show={showShareModal} onHide={() => setShowShareModal(false)} centered>
+        <Modal.Header closeButton style={{ background: "#c0392b", color: "#fff" }}>
+          <Modal.Title>
+            <FontAwesomeIcon icon="share-alt" className="me-2" />
+            Share Safety Plan
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-center p-4">
+          <p className="text-muted mb-3">
+            Anyone with this link or QR code can view your Safety Plan.
+            Only share with people you trust.
+          </p>
+
+          {/* Share link */}
+          <div className="mb-3">
+            <div
+              className="d-flex align-items-center gap-2 p-2 rounded"
+              style={{ background: "#f8d7da", border: "1px solid #f5c6cb" }}
+            >
+              <small className="text-break flex-grow-1 text-start" style={{ wordBreak: "break-all" }}>
+                {shareURL}
+              </small>
+              <Button
+                size="sm"
+                variant={copySuccess ? "success" : "danger"}
+                onClick={handleCopyLink}
+                style={{ whiteSpace: "nowrap" }}
+              >
+                <FontAwesomeIcon icon={copySuccess ? "check" : "copy"} className="me-1" />
+                {copySuccess ? "Copied!" : "Copy"}
+              </Button>
+            </div>
+            <small className="text-muted">
+              Passcode: <strong>{plan.crisisPasscode}</strong>
+            </small>
+          </div>
+
+          {/* QR Code */}
+          {qrDataURL ? (
+            <>
+              <img
+                src={qrDataURL}
+                alt="Safety Plan QR Code"
+                style={{ maxWidth: 220, border: "4px solid #c0392b", borderRadius: 8 }}
+                className="mb-3"
+              />
+              <div>
+                <Button variant="outline-danger" size="sm" onClick={downloadQR}>
+                  <FontAwesomeIcon icon="download" className="me-1" />
+                  Download QR Code
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-muted small">Generating QR code...</div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowShareModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Row>
   );
 };
