@@ -49,6 +49,9 @@ const RegistrationPending = React.lazy(
 );
 const SubmitStory = React.lazy(() => import("./pages/SubmitStory.jsx"));
 const SocialDashboard = React.lazy(() => import("./components/SocialDashboard/SocialDashboard.jsx"));
+const CreateSafetyPlan = React.lazy(() => import("./pages/CreateSafetyPlan.jsx"));
+const MySafetyPlan = React.lazy(() => import("./pages/MySafetyPlan.jsx"));
+const ViewSafetyPlan = React.lazy(() => import("./pages/ViewSafetyPlan.jsx"));
 const NotificationsPage = React.lazy(() => import("./pages/NotificationsPage.jsx"));
 const CaregiverSettings = React.lazy(() => import("./pages/settings/CaregiverSettings.jsx"));
 
@@ -256,6 +259,48 @@ const router = createBrowserRouter([
             }
           >
             <ViewPassport />
+          </Suspense>
+        ),
+      },
+      {
+        path: "my-safety-plan",
+        element: (
+          <Suspense
+            fallback={
+              <div className="d-flex justify-content-center p-4">
+                <div className="spinner-border" role="status"></div>
+              </div>
+            }
+          >
+            <MySafetyPlan />
+          </Suspense>
+        ),
+      },
+      {
+        path: "create-safety-plan",
+        element: (
+          <Suspense
+            fallback={
+              <div className="d-flex justify-content-center p-4">
+                <div className="spinner-border" role="status"></div>
+              </div>
+            }
+          >
+            <CreateSafetyPlan />
+          </Suspense>
+        ),
+      },
+      {
+        path: "safety-plan/view/:passcode",
+        element: (
+          <Suspense
+            fallback={
+              <div className="d-flex justify-content-center p-4">
+                <div className="spinner-border" role="status"></div>
+              </div>
+            }
+          >
+            <ViewSafetyPlan />
           </Suspense>
         ),
       },

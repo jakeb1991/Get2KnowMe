@@ -64,7 +64,9 @@ import {
   faTimesCircle,
   faBell,
   faChevronDown,
-  faUserFriends
+  faUserFriends,
+  faMapMarkerAlt,
+  faPlus
 } from '@fortawesome/free-solid-svg-icons';
 
 // Tell FontAwesome to skip adding the CSS automatically 
@@ -136,7 +138,9 @@ library.add(
   faTimesCircle,
   faBell,
   faChevronDown,
-  faUserFriends
+  faUserFriends,
+  faMapMarkerAlt,
+  faPlus
 );
 
 export default config;

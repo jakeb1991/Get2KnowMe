@@ -10,6 +10,7 @@ import storiesRoutes from "./src/routes/stories.js";
 import followRoutes from "./src/routes/follow-routes.js";
 import notificationRoutes from "./src/routes/notification-routes.js";
 import caregiverRoutes from "./src/routes/caregiver-routes.js";
+import safetyPlanRoutes from "./src/routes/safety-plan-routes.js";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import compression from "compression";
@@ -223,6 +224,8 @@ app.use('/api/stories/', csrfProtection);
 app.use('/api/follow/', csrfProtection);
 app.use('/api/notifications/', csrfProtection);
 app.use('/api/delegate/', csrfProtection);
+app.use('/api/safety-plan/create', csrfProtection);
+app.use('/api/safety-plan/delete', csrfProtection);
 
 // API Routes for user data
 app.use("/api/users", userRoutes);
@@ -231,6 +234,7 @@ app.use("/api/stories", storiesRoutes);
 app.use("/api/follow", followRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/delegate", caregiverRoutes);
+app.use("/api/safety-plan", safetyPlanRoutes);
 
 // Static file serving for production
 // This serves the React app built files from the dist directory

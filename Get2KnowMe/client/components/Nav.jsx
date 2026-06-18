@@ -111,6 +111,18 @@ const NavTabs = () => {
               Passport Lookup
             </BsNav.Link>
 
+            {user && (
+              <BsNav.Link
+                as={Link}
+                to="/my-safety-plan"
+                active={currentPage === "/my-safety-plan" || currentPage === "/create-safety-plan"}
+                className="nav-item-custom"
+                onClick={closeNavbar}
+              >
+                Safety Plan
+              </BsNav.Link>
+            )}
+
             {/* Learn More link - available to all users */}
             <BsNav.Link
               as={Link}

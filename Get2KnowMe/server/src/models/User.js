@@ -100,6 +100,26 @@ const communicationPassportSchema = new Schema({
 });
 
 
+const safetyPlanSchema = new Schema({
+  warningSigns: { type: String, trim: true },
+  triggers: { type: String, trim: true },
+  whatToDo: { type: String, trim: true },
+  whatNotToDo: { type: String, trim: true },
+  safeSpaces: { type: String, trim: true },
+  safeContacts: [{
+    name: { type: String, trim: true },
+    phone: { type: String, trim: true },
+    countryCode: { type: String, trim: true, default: 'GB' },
+    relationship: { type: String, trim: true },
+    email: { type: String, trim: true }
+  }],
+  afterCrisisNeeds: { type: String, trim: true },
+  crisisPasscode: { type: String, trim: true },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
 const userSchema = new Schema({
   email: {
     type: String,
@@ -130,6 +150,7 @@ const userSchema = new Schema({
     userAgent: { type: String },
   },
   communicationPassport: communicationPassportSchema,
+  safetyPlan: safetyPlanSchema,
   // Privacy settings for social features (moved to root)
   privacySettings: {
     allowFollowRequests: { type: Boolean, default: true },
