@@ -74,21 +74,19 @@ const CreateSafetyPlan = () => {
         // (e.g. newly added fields not yet in an older saved plan) stays as ""
         // rather than undefined, which would make those inputs uncontrolled.
         const planData = {
-          thingsOfHope: "",
-          warningSigns: "",
-          triggers: "",
-          safetyActions: "",
-          whatToDo: "",
-          whatNotToDo: "",
-          safeSpaces: "",
-          safeContacts: [],
-          afterCrisisNeeds: "",
-          crisisPasscode: "",
-          ...data.plan,
+          thingsOfHope: data.plan.thingsOfHope ?? "",
+          warningSigns: data.plan.warningSigns ?? "",
+          triggers: data.plan.triggers ?? "",
+          safetyActions: data.plan.safetyActions ?? "",
+          whatToDo: data.plan.whatToDo ?? "",
+          whatNotToDo: data.plan.whatNotToDo ?? "",
+          safeSpaces: data.plan.safeSpaces ?? "",
           safeContacts: (data.plan.safeContacts || []).map((c) => ({
             ...c,
             countryCode: c.countryCode || "GB",
           })),
+          afterCrisisNeeds: data.plan.afterCrisisNeeds ?? "",
+          crisisPasscode: data.plan.crisisPasscode ?? "",
         };
         setFormData(planData);
         setIsEditing(true);

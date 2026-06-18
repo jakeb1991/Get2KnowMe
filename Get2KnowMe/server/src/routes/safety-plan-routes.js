@@ -13,6 +13,8 @@ const ENCRYPTED_FREETEXT_FIELDS = [
   'whatToDo', 'whatNotToDo', 'safeSpaces', 'afterCrisisNeeds'
 ];
 
+console.log('[safety-plan-routes] loaded. Encrypted fields:', ENCRYPTED_FREETEXT_FIELDS.join(', '));
+
 /**
  * Build a dot-notation $set update object for safetyPlan.
  * Encrypts freetext fields and sensitive contact sub-fields.
@@ -219,6 +221,11 @@ router.delete('/delete', authenticateToken, async (req, res) => {
     console.error('Error deleting safety plan:', error);
     return res.status(500).json({ message: 'Error deleting safety plan' });
   }
+});
+
+// GET /api/safety-plan/fields  (diagnostic — confirms which fields the running server knows about)
+router.get('/fields', (req, res) => {
+  res.json({ encryptedFields: ENCRYPTED_FREETEXT_FIELDS });
 });
 
 // GET /api/safety-plan/encryption-test  (temporary diagnostic — no auth)
