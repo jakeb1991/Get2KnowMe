@@ -4,6 +4,12 @@ const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12; // 96-bit nonce — recommended for GCM
 const ENC_PREFIX = 'enc:';
 
+if (!process.env.FIELD_ENCRYPTION_SECRET) {
+  console.error('[CRITICAL] FIELD_ENCRYPTION_SECRET is not set! Encryption will fail for non-empty values. Set this env var on Render.');
+} else {
+  console.log('[encryption] FIELD_ENCRYPTION_SECRET is configured.');
+}
+
 function getKey() {
   const secret = process.env.FIELD_ENCRYPTION_SECRET;
   if (!secret) throw new Error('FIELD_ENCRYPTION_SECRET env var is not set');

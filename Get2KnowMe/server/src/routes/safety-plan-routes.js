@@ -129,7 +129,7 @@ router.post('/create', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error('Error creating safety plan:', error);
-    return res.status(500).json({ message: 'Error saving safety plan' });
+    return res.status(500).json({ message: error.message || 'Error saving safety plan' });
   }
 });
 
@@ -216,6 +216,17 @@ router.delete('/delete', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error deleting safety plan:', error);
     return res.status(500).json({ message: 'Error deleting safety plan' });
+  }
+});
+
+// GET /api/safety-plan/encryption-test  (temporary diagnostic — no auth)
+router.get('/encryption-test', (req, res) => {
+  try {
+    const test = encrypt('hello');
+    const result = decrypt(test);
+    res.json({ ok: result === 'hello', message: 'Encryption is working correctly.' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
 
